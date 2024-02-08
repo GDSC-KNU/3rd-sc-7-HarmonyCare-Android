@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_pattern">
+
+
+    <!--<fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.harmonycare.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.example.harmonycare.ui.dashboard.DashboardFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.harmonycare.ui.notifications.NotificationsFragment"
+        android:label="@string/title_notifications"
+        tools:layout="@layout/fragment_notifications" />-->
+
+    <fragment
+        android:id="@+id/navigation_checklist"
+        android:name="com.example.harmonycare.ui.checklist.ChecklistFragment"
+        android:label="Checklist"
+        tools:layout="@layout/fragment_checklist"/>
+
+    <fragment
+        android:id="@+id/navigation_record"
+        android:name="com.example.harmonycare.ui.record.RecordFragment"
+        android:label="Record"
+        tools:layout="@layout/fragment_record"/>
+
+    <fragment
+        android:id="@+id/navigation_pattern"
+        android:name="com.example.harmonycare.ui.pattern.PatternFragment"
+        android:label="Pattern"
+        tools:layout="@layout/fragment_pattern"/>
+
+    <fragment
+        android:id="@+id/navigation_community"
+        android:name="com.example.harmonycare.ui.community.CommunityFragment"
+        android:label="Community"
+        tools:layout="@layout/fragment_community"/>
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.harmonycare.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile"/>
+
+
+</navigation>
