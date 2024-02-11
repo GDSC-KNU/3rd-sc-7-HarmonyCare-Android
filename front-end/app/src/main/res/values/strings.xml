@@ -10,4 +10,5 @@
     <string name="title_notifications">Notifications</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+        <string name="google_server_client_id">185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com</string>
 </resources>
