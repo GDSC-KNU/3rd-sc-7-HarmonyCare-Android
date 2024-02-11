@@ -13,10 +13,13 @@ import android.os.Bundle
 import android.os.CancellationSignal
 import android.util.Log
 import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
 import androidx.credentials.CredentialManagerCallback
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
+import com.example.harmonycare.ui.login.LoginDialog
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -36,6 +39,8 @@ class LoginActivity : AppCompatActivity() {
         .setFilterByAuthorizedAccounts(true)
         .setServerClientId(SERVER_CLIENT_ID)
         .build()*/
+
+    val googleOAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline&include_granted_scopes=true&response_type=code&redirect_uri=http://localhost:8080&client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -59,8 +64,35 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        val loginButton: ImageButton = findViewById(R.id.GoogleLoginButton)
+        loginButton.setOnClickListener {
+            showLoginDialog()
+        }
+
+
+
 
     }
+
+
+    private fun showLoginDialog() {
+        val googleOAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline&include_granted_scopes=true&response_type=code&redirect_uri=http://localhost:8080&client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com"
+
+        val dialog = LoginDialog(this, googleOAuthUrl) { code ->
+            if (code != null) {
+                // 인증 코드가 있으면 서버로 전송하여 처리
+
+            } else {
+                // 사용자가 취소한 경우 처리
+                // 예: 에러 처리 또는 다른 작업 수행
+            }
+        }
+        dialog.show()
+    }
+
+
+
+
 
 
 
