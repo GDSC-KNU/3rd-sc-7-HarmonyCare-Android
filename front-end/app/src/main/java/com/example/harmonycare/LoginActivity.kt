@@ -1,33 +1,18 @@
 package com.example.harmonycare
 
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
-import android.credentials.CredentialManager
-import android.credentials.GetCredentialException
-import android.credentials.GetCredentialResponse
-import android.credentials.PrepareGetCredentialResponse
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.CancellationSignal
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
-import androidx.credentials.CredentialManagerCallback
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetPasswordOption
-import androidx.credentials.GetPublicKeyCredentialOption
 import com.example.harmonycare.ui.login.LoginDialog
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import java.util.concurrent.Executor
 
 class LoginActivity : AppCompatActivity() {
 
