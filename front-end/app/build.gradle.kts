@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.harmonycare"
-        minSdk = 24
+        minSdk = 34
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -35,11 +35,14 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
     }
 
 }
 
 dependencies {
+    //credential
+    implementation("androidx.credentials:credentials:1.2.0")
     //retrofit 라이브러리
     implementation("com.squareup.retrofit2:retrofit:2.6.4")
     //Gson 변환기 라이브러리

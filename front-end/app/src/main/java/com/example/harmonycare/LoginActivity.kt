@@ -1,50 +1,109 @@
 package com.example.harmonycare
 
-import android.content.ContentValues.TAG
+import android.accounts.AccountManager
+import android.accounts.AccountManagerCallback
+import android.accounts.AccountManagerFuture
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
-import android.credentials.CredentialManager
 import android.credentials.GetCredentialException
-import android.credentials.GetCredentialResponse
-import android.credentials.PrepareGetCredentialResponse
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.CancellationSignal
+import android.os.Message
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import androidx.credentials.CredentialManagerCallback
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
-import com.example.harmonycare.ui.login.LoginDialog
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import java.util.concurrent.Executor
+import androidx.credentials.CustomCredential
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.logging.Handler
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var oneTapClient: SignInClient
+    private lateinit var webView: WebView
+    val credentialManager= androidx.credentials.CredentialManager.create(this)
+    val getPasswordOption = GetPasswordOption()
+    val googleOAuthUrl = URL("https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline&include_granted_scopes=true&response_type=code&redirect_uri=http://localhost:8080&client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com\")\n")
+
+    /*// Get passkey from the user's public key credential provider.
+    val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
+        requestJson = requestJson
+    )
+    val getCredRequest = GetCredentialRequest(
+        listOf(getPasswordOption, getPublicKeyCredentialOption)
+    )
+
+
+    val am: AccountManager = AccountManager.get(this)
+    val options = Bundle()
+
+    fun getToken() {
+        val options = null // Authenticator-specific options
+
+        am.getAuthToken(
+            googleOAuthUrl,                     // Account retrieved using getAccountsByType()
+            "Manage your tasks",            // Auth scope
+            options,                        // Authenticator-specific options
+            this,                           // Your activity
+            OnTokenAcquired(),              // Callback called when a token is successfully acquired
+            Handler(OnError())              // Callback called if an error occurs
+        )
+    }
+
+    private inner class OnTokenAcquired : AccountManagerCallback<Bundle> {
+
+        override fun run(result: AccountManagerFuture<Bundle>) {
+            val launch: Intent? = result.getResult().get(AccountManager.KEY_INTENT) as? Intent
+            if (launch != null) {
+                startActivityForResult(launch, 0)
+            }
+        }
+    }
+
+    private inner class OnError : Handler.Callback {
+        override fun handleMessage(msg: Message): Boolean {
+            // Handle error here
+            Log.e(TAG, "Error occurred during authentication")
+            return true
+        }
+    }*/
+
+    fun sendRequest(token: String) {
+        val url = URL("https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline&include_granted_scopes=true&response_type=code&redirect_uri=http://localhost:8080&client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com")
+        val conn = url.openConnection() as HttpURLConnection
+
+        conn.apply {
+            addRequestProperty("client_id", "your_client_id")
+            addRequestProperty("client_secret", "your_client_secret")
+            setRequestProperty("Authorization", "OAuth $token")
+        }
+    }
+
+
+    /*private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
     private val REQ_ONE_TAP = 200
-    private var showOneTapUI = true
+    private var showOneTapUI = true*/
     /*val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(true)
         .setServerClientId(SERVER_CLIENT_ID)
         .build()*/
 
-    val googleOAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline&include_granted_scopes=true&response_type=code&redirect_uri=http://localhost:8080&client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com"
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        oneTapClient = Identity.getSignInClient(this)
+        /*oneTapClient = Identity.getSignInClient(this)
         signInRequest = BeginSignInRequest.builder()
             .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
                 .setSupported(true)
@@ -59,93 +118,44 @@ class LoginActivity : AppCompatActivity() {
                     .build())
             // Automatically sign in when exactly one credential is retrieved.
             .setAutoSelectEnabled(true)
-            .build()
+            .build()*/
+        /*val loginButton: ImageButton = findViewById(R.id.GoogleLoginButton)
+                loginButton.setOnClickListener {
+                    showLoginDialog()
+                }*/
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val loginButton: ImageButton = findViewById(R.id.GoogleLoginButton)
-        loginButton.setOnClickListener {
-            showLoginDialog()
-        }
+        webView = findViewById(R.id.webView)
 
+        // WebView 설정
+        webView.webViewClient = WebViewClient()
+        webView.settings.userAgentString = "Mozilla/5.0 AppleWebKit/535.19 Chrome/121.0.0 Mobile Safari/535.19";
+        webView.settings.javaScriptEnabled = true
 
+        // Google 로그인 페이지 URL 로드
+        val url = "https://accounts.google.com/o/oauth2/v2/auth?" +
+                "scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile&" +
+                "access_type=offline&" +
+                "include_granted_scopes=true&" +
+                "response_type=code&" +
+                "redirect_uri=http://localhost:8080&" +
+                "client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com"
+        webView.loadUrl(url)
 
+    }
 
+    // 자격 증명을 가져오는 과정에서 예외가 발생했을 때의 처리를 담은 함수를 정의합니다.
+    private fun handleFailure(e: GetCredentialException) {
+        // GetCredentialException 예외를 처리하는 코드를 작성합니다.
+        Log.e(TAG, "Error retrieving credential: ${e.message}")
+    }
+
+    companion object {
+        private const val TAG = "LoginActivity"
     }
 
 
-    private fun showLoginDialog() {
-        val googleOAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline&include_granted_scopes=true&response_type=code&redirect_uri=http://localhost:8080&client_id=185976520158-phphtutm302clototd3rqgecng4a4bg2.apps.googleusercontent.com"
-
-        val dialog = LoginDialog(this, googleOAuthUrl) { code ->
-            if (code != null) {
-                // 인증 코드가 있으면 서버로 전송하여 처리
-
-            } else {
-                // 사용자가 취소한 경우 처리
-                // 예: 에러 처리 또는 다른 작업 수행
-            }
-        }
-        dialog.show()
-    }
-
-
-
-
-
-
-
-    fun buttonGoogleSignIn(view: View) {
-
-        oneTapClient.beginSignIn(signInRequest)
-            .addOnSuccessListener(this) { result ->
-                try {
-                    startIntentSenderForResult(
-                        result.pendingIntent.intentSender, REQ_ONE_TAP,
-                        null, 0, 0, 0, null)
-                } catch (e: IntentSender.SendIntentException) {
-                    Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
-                }
-            }
-            .addOnFailureListener(this) { e ->
-                // No saved credentials found. Launch the One Tap sign-up flow, or
-                // do nothing and continue presenting the signed-out UI.
-                Log.d(TAG, e.localizedMessage)
-            }
-
-    }
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when (requestCode) {
-            REQ_ONE_TAP -> {
-                try {
-                    val credential = oneTapClient.getSignInCredentialFromIntent(data)
-                    val idToken = credential.googleIdToken
-                    val username = credential.id
-                    val password = credential.password
-
-                    when {
-                        idToken != null -> {
-                            // Got an ID token from Google. Use it to authenticate
-                            // with your backend.
-                            Log.d(TAG, "Got ID token.")
-                        }
-                        password != null -> {
-                            // Got a saved username and password. Use them to authenticate
-                            // with your backend.
-                            Log.d(TAG, "Got password.")
-                        }
-                        else -> {
-                            // Shouldn't happen.
-                            Log.d(TAG, "No ID token or password!")
-                        }
-                    }
-                } catch (e: ApiException) {
-                    // ...
-                }
-            }
-        }
-    }
 }
+

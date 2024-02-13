@@ -27,6 +27,7 @@ class LoginDialog (
             webView.settings.javaScriptEnabled = true
             webView.webViewClient = WebViewClient()
             webView.webChromeClient = WebChromeClient()
+
         }
 
         private fun loadLoginPage() {
