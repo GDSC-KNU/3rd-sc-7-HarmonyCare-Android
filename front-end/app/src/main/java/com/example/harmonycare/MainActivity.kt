@@ -27,13 +27,13 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
         // SharedPreferences에서 authcode 가져오기
-        val authCode = sharedPreferences.getString("authcode", null)
+        val accessToken = sharedPreferences.getString("accessToken", null)
 
-        if (authCode != null) {
-            // authcode가 존재하면 토스트 메시지로 표시
-            showToast("인증 코드: $authCode")
+        if (accessToken != null) {
+            // accessToken 존재하면 토스트 메시지로 표시
+            showToast("인증 코드: $accessToken")
         } else {
-            // authcode가 존재하지 않으면 토스트 메시지로 표시
+            // accessToken 존재하지 않으면 토스트 메시지로 표시
             showToast("인증 코드가 없습니다.")
         }
 

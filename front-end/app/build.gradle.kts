@@ -49,6 +49,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.6.4")
     //Scalars 변환기 라이브러리
     implementation("com.squareup.retrofit2:converter-scalars:2.6.4")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("androidx.browser:browser:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")

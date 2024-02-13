@@ -4,11 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
+import com.example.harmonycare.login.ApiManager
+import com.example.harmonycare.login.ApiService
+import com.example.harmonycare.login.RetrofitClient
 import java.util.regex.Pattern
+
 
 class LoginActivity : AppCompatActivity() {
 
@@ -32,13 +37,25 @@ class LoginActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 if (url != null && url.startsWith("http://localhost:8080")) {
                     // 리다이렉션 링크를 가져와서 파라미터 추출
-                    showToast("리다이렉션 링크: $url")
                     val authCode = extractCodeFromUrl(url)
+                    Log.d("kkang", "url:$url")
+                    Log.d("kkang", "authCode:$authCode")
                     if (authCode != null) {
-                        // SharedPreferences에 authcode 저장
-                        saveAuthCode(authCode)
-                        showToast("인증 코드 저장됨: $authCode")
 
+                        val apiService = RetrofitClient.createService(ApiService::class.java)
+                        val apiManager = ApiManager(apiService)
+                        // 여기서 POST요청
+                        apiManager.loginUser(authCode,
+                            onResponse = { accessToken ->
+                                // accessToken을 저장하거나 필요한 작업을 수행합니다.
+                                showToast("accessToken 저장됨: $accessToken")
+                                Log.d("kkang", "accessToken:$accessToken")
+                                saveAccessTokenCode(accessToken)
+                            },
+                            onFailure = {
+                                // 실패한 경우 처리
+                            }
+                        )
                         // MainActivity로 이동
                         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                         // 현재 액티비티 종료
@@ -76,10 +93,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
-    private fun saveAuthCode(authCode: String) {
-        // SharedPreferences에 authcode 저장
+    private fun saveAccessTokenCode(accessToken: String) {
+        // SharedPreferences에 accessToken 저장
         val editor = sharedPreferences.edit()
-        editor.putString("authcode", authCode)
+        editor.putString("accessToken", accessToken)
         editor.apply()
     }
 
