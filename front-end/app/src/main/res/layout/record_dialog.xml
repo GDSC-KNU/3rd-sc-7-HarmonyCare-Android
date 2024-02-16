@@ -66,10 +66,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:text="Choose time"/>
+            android:text="Choose start time"/>
 
         <TimePicker
-            android:id="@+id/timePicker"
+            android:id="@+id/startTimePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:timePickerMode="spinner"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="Choose end time"/>
+
+        <TimePicker
+            android:id="@+id/endTimePicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:timePickerMode="spinner"/>

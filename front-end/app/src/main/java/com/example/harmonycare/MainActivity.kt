@@ -10,6 +10,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.harmonycare.data.SharedPreferencesManager
 import com.example.harmonycare.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -23,11 +24,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // SharedPreferences 초기화
-        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-
-        // SharedPreferences에서 authcode 가져오기
-        val accessToken = sharedPreferences.getString("accessToken", null)
+        // 저장된 accessToken을 가져와서 사용
+        val accessToken = SharedPreferencesManager.getAccessToken()
 
         if (accessToken != null) {
             // accessToken 존재하면 토스트 메시지로 표시

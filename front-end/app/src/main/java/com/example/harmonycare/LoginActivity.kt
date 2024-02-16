@@ -1,6 +1,5 @@
 package com.example.harmonycare
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -9,23 +8,23 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
-import com.example.harmonycare.login.ApiManager
-import com.example.harmonycare.login.ApiService
-import com.example.harmonycare.login.RetrofitClient
+import com.example.harmonycare.data.SharedPreferencesManager
+import com.example.harmonycare.retrofit.ApiManager
+import com.example.harmonycare.retrofit.ApiService
+import com.example.harmonycare.retrofit.RetrofitClient
 import java.util.regex.Pattern
 
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         // SharedPreferences 초기화
-        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        SharedPreferencesManager.init(this)
 
         webView = findViewById(R.id.webView)
 
@@ -41,16 +40,16 @@ class LoginActivity : AppCompatActivity() {
                     Log.d("kkang", "url:$url")
                     Log.d("kkang", "authCode:$authCode")
                     if (authCode != null) {
-
-                        val apiService = RetrofitClient.createService(ApiService::class.java)
+                        val apiService = RetrofitClient.retrofit.create(ApiService::class.java)
                         val apiManager = ApiManager(apiService)
+
                         // 여기서 POST요청
                         apiManager.loginUser(authCode,
                             onResponse = { accessToken ->
                                 // accessToken을 저장하거나 필요한 작업을 수행합니다.
                                 showToast("accessToken 저장됨: $accessToken")
                                 Log.d("kkang", "accessToken:$accessToken")
-                                saveAccessTokenCode(accessToken)
+                                SharedPreferencesManager.saveAccessToken(accessToken)
                             },
                             onFailure = {
                                 // 실패한 경우 처리
@@ -90,14 +89,6 @@ class LoginActivity : AppCompatActivity() {
         } else {
             null
         }
-    }
-
-
-    private fun saveAccessTokenCode(accessToken: String) {
-        // SharedPreferences에 accessToken 저장
-        val editor = sharedPreferences.edit()
-        editor.putString("accessToken", accessToken)
-        editor.apply()
     }
 
     private fun showToast(message: String) {

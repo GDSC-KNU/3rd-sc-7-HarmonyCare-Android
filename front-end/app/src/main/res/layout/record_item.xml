@@ -61,13 +61,13 @@
                 android:textSize="14sp"/>
         </LinearLayout>
         <ImageButton
-            android:id="@+id/button_next"
+            android:id="@+id/button_delete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="25dp"
             android:layout_weight="1"
             android:layout_gravity="center"
-            android:src="@drawable/icon_next"
+            android:src="@drawable/icon_x"
             android:background="@color/white"/>
     </LinearLayout>
     <View

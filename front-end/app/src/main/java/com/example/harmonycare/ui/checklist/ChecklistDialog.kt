@@ -1,4 +1,4 @@
-package com.example.harmonycare.ui.dialog
+package com.example.harmonycare.ui.checklist
 
 import android.app.Dialog
 import android.content.Context
