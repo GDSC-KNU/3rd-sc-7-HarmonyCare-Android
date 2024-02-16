@@ -87,4 +87,8 @@ class RecordAdapter(
     override fun getItemCount(): Int {
         return dataList.size
     }
+
+    fun getDataList(): List<Record> {
+        return dataList
+    }
 }

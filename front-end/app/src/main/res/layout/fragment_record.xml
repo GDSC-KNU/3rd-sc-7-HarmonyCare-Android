@@ -26,6 +26,7 @@
                 android:textColor="@color/black"
                 android:text="recent diaper"/>
             <TextView
+                android:id="@+id/recent_diaper_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
@@ -45,6 +46,7 @@
                 android:textColor="@color/black"
                 android:text="recent meal"/>
             <TextView
+                android:id="@+id/recent_meal_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
@@ -62,12 +64,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                android:text="recent diaper"/>
+                android:text="recent sleep"/>
             <TextView
+                android:id="@+id/recent_sleep_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="@color/sleep_blue"
                 android:text="no record"/>
         </LinearLayout>
     </LinearLayout>

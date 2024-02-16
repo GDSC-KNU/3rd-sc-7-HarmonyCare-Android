@@ -6,6 +6,8 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -23,6 +25,8 @@ import com.example.harmonycare.retrofit.ApiManager
 import com.example.harmonycare.retrofit.ApiService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.example.harmonycare.retrofit.RetrofitClient
+import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -31,11 +35,16 @@ class RecordFragment : Fragment() {
     private var _binding: FragmentRecordBinding? = null
     private val binding get() = _binding!!
     private var isFabOpen = false
+    private lateinit var adapter: RecordAdapter
+    private val handler = Handler(Looper.getMainLooper())
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         _binding = FragmentRecordBinding.inflate(inflater, container, false)
-        val view = binding.root
-        return view
+        return binding.root
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -49,19 +58,19 @@ class RecordFragment : Fragment() {
             toggleFab()
         }
         binding.fabBath.setOnClickListener {
-            saveRecord("BATH", DateTimeToString(LocalDateTime.now()), DateTimeToString(LocalDateTime.now().plusMinutes(1)), "description")
+            saveRecord("BATH", dateTimeToString(LocalDateTime.now()), dateTimeToString(LocalDateTime.now().plusMinutes(1)), "description")
         }
         binding.fabDiaper.setOnClickListener {
-            saveRecord("DIAPER", DateTimeToString(LocalDateTime.now()), DateTimeToString(LocalDateTime.now()), "description")
+            saveRecord("DIAPER", dateTimeToString(LocalDateTime.now()), dateTimeToString(LocalDateTime.now()), "description")
         }
         binding.fabMeal.setOnClickListener {
-            saveRecord("MEAL", DateTimeToString(LocalDateTime.now()), DateTimeToString(LocalDateTime.now()), "description")
+            saveRecord("MEAL", dateTimeToString(LocalDateTime.now()), dateTimeToString(LocalDateTime.now()), "description")
         }
         binding.fabPlay.setOnClickListener {
-            saveRecord("PLAY", DateTimeToString(LocalDateTime.now()), DateTimeToString(LocalDateTime.now()), "description")
+            saveRecord("PLAY", dateTimeToString(LocalDateTime.now()), dateTimeToString(LocalDateTime.now()), "description")
         }
         binding.fabSleep.setOnClickListener {
-            saveRecord("SLEEP", DateTimeToString(LocalDateTime.now()), DateTimeToString(LocalDateTime.now()), "description")
+            saveRecord("SLEEP", dateTimeToString(LocalDateTime.now()), dateTimeToString(LocalDateTime.now()), "description")
         }
     }
 
@@ -74,7 +83,7 @@ class RecordFragment : Fragment() {
             val apiManager = ApiManager(apiService)
 
 
-            apiManager.getRecordsForDay("2024-02-15", 1, "Bearer $accessToken",
+            apiManager.getRecordsForDay(LocalDateTime.now().toLocalDate().toString(), 1, "Bearer $accessToken",
                 { response ->
                     if (response != null) {
                         onDataLoaded(response)
@@ -90,7 +99,7 @@ class RecordFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getDataListAndSetAdapter() {
         getDataList { recordList ->
-            val adapter = RecordAdapter(requireContext(), recordList,
+            adapter = RecordAdapter(requireContext(), recordList,
                 onItemClick = { record ->
                     showDetailDialog(record)
                 },
@@ -103,9 +112,10 @@ class RecordFragment : Fragment() {
             )
             binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
             binding.recyclerView.adapter = adapter
+
+            startUpdateTimeRunnable()
         }
     }
-
 
 
     private fun toggleFab() {
@@ -189,7 +199,6 @@ class RecordFragment : Fragment() {
 
                 apiManager.updateRecord(record.recordId, recordTask, startTime, endTime, description, accessToken, onResponse =
                 {   response ->
-                    makeToast(requireContext(), "update success")
                     getDataListAndSetAdapter()
                 },
                 {
@@ -216,7 +225,7 @@ class RecordFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun DateTimeToString(dateTime: LocalDateTime): String {
+    fun dateTimeToString(dateTime: LocalDateTime): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss")
         return dateTime.format(formatter)
     }
@@ -228,8 +237,6 @@ class RecordFragment : Fragment() {
         if (!accessToken.isNullOrEmpty()) {
             val apiService = RetrofitClient.retrofit.create(ApiService::class.java)
             val apiManager = ApiManager(apiService)
-
-            makeToast(requireContext(), "$accessToken")
 
             apiManager.saveRecord(accessToken, recordTask, startTime, endTime, description, { response ->
                 // HTTP 응답 코드가 201이면 성공으로 간주합니다.
@@ -277,7 +284,6 @@ class RecordFragment : Fragment() {
 
             apiManager.deleteRecord(record.recordId, accessToken, { response ->
                 if (response == true) {
-                    // 데이터가 변경됐으므로 RecyclerView를 업데이트
                     getDataListAndSetAdapter()
                 } else {
                     Log.e(TAG, "Failed to save record.")
@@ -285,6 +291,60 @@ class RecordFragment : Fragment() {
                 }
             })
 
+        }
+    }
+
+    private fun startUpdateTimeRunnable() {
+        handler.removeCallbacksAndMessages(null)
+
+        handler.post(object : Runnable {
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun run() {
+                updateLastUpdateTime()
+                handler.postDelayed(this, 60000) // 1분마다 갱신
+            }
+        })
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateLastUpdateTime() {
+        if (!::adapter.isInitialized) return // adapter가 초기화되지 않았다면 함수 종료
+        val dataList = adapter.getDataList()
+
+        val diaperRecords = dataList.filter { it.recordTask == "DIAPER" }
+        val mealRecords = dataList.filter { it.recordTask == "MEAL" }
+        val sleepRecords = dataList.filter { it.recordTask == "SLEEP" }
+
+        var recentDiaperTime = findRecentTime(diaperRecords)
+        var recentMealTime = findRecentTime(mealRecords)
+        var recentSleepTime = findRecentTime(sleepRecords)
+
+        binding.recentDiaperTextview.text = recentDiaperTime
+        binding.recentMealTextview.text = recentMealTime
+        binding.recentSleepTextview.text = recentSleepTime
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun findRecentTime(records: List<Record>): String {
+        if (records.isEmpty()) return "No record"
+
+        val currentTime = LocalDateTime.now()
+        val recentRecord = records.maxByOrNull { it.startTime } ?: return "No record"
+        val difference = Duration.between(recentRecord.startTime, currentTime)
+        val differenceMinutes = difference.toMinutes()
+
+        return if (differenceMinutes < 60) {
+            "● $differenceMinutes m ago"
+        } else if (differenceMinutes < 1440) {
+            val differenceHours = difference.toHours()
+            val remainingMinutes = differenceMinutes % 60
+            if (remainingMinutes == 0L) {
+                "● $differenceHours h ago"
+            } else {
+                "● $differenceHours h $remainingMinutes m ago"
+            }
+        } else {
+            "Long time ago"
         }
     }
 
