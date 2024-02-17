@@ -1,7 +1,9 @@
 package com.example.harmonycare.retrofit
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.harmonycare.data.Checklist
 import com.google.gson.annotations.SerializedName
 import okhttp3.RequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -51,8 +53,38 @@ interface ApiService {
     @DELETE("/api/v1/record/{recordId}")
     fun deleteRecord(
         @Path("recordId") recordId: Int,
-        @Header("Authorization") authToken: String,
+        @Header("Authorization") authToken: String
     ): Call<RecordDeleteResponse>
+
+    @GET("/api/v1/checklist/me")
+    fun getChecklist(
+        @Header("Authorization") authToken: String
+    ): Call<ApiSuccessResultListChecklistReadResponse>
+
+    @POST("/api/v1/checklist")
+    fun saveChecklist(
+        @Header("Authorization") authToken: String,
+        @Body requestBody: ChecklistSaveRequest
+    ): Call<SaveRecordResponse>
+
+    @DELETE("/api/v1/checklist/{checklistId}")
+    fun deleteChecklist(
+        @Path("checklistId") checklistId: Int,
+        @Header("Authorization") authToken: String
+    ): Call<RecordDeleteResponse>
+
+    @PUT("/api/v1/checklist/check/{checklistId}")
+    fun toggleChecklist(
+        @Path("checklistId") checklistId: Int,
+        @Header("Authorization") authToken: String
+    ): Call<ApiSuccessResultBoolean>
+
+    @PUT("/api/v1/checklist/{checklistId}")
+    fun updateChecklist(
+        @Path("checklistId") checklistId: Int,
+        @Header("Authorization") authToken: String,
+        @Body requestBody: ChecklistSaveRequest
+    ): Call<SaveRecordResponse>
 }
 
 class ApiManager(private val apiService: ApiService) {
@@ -188,6 +220,119 @@ class ApiManager(private val apiService: ApiService) {
 
         })
     }
+
+    fun getChecklist(accessToken: String, checklistData: (List<Checklist>) -> Unit) {
+        val call = apiService.getChecklist("Bearer $accessToken")
+        call.enqueue(object: Callback<ApiSuccessResultListChecklistReadResponse> {
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onResponse(
+                call: Call<ApiSuccessResultListChecklistReadResponse>,
+                response: Response<ApiSuccessResultListChecklistReadResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val responseData: ApiSuccessResultListChecklistReadResponse? = response.body()
+
+                    responseData?.response?.map { checklist ->
+                        Checklist(
+                            checklistId = checklist.checklistId,
+                            title = checklist.title,
+                            days = checklist.days,
+                            checkTime = LocalDateTime.parse(checklist.checkTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                            isCheck = checklist.isCheck
+                        )
+                    }?.let { checklistData(it) }
+                }
+            }
+
+            override fun onFailure(
+                call: Call<ApiSuccessResultListChecklistReadResponse>,
+                t: Throwable
+            ) {
+                Log.d("kkang", "checklist read failed")
+            }
+
+        })
+    }
+
+    fun saveChecklist(accessToken: String, title: String, days: List<String>, checkTime: String, onResponse: (Boolean) -> Unit) {
+        val requestBody = ChecklistSaveRequest(title, days, checkTime)
+        val call = apiService.saveChecklist("Bearer $accessToken", requestBody)
+        call.enqueue(object: Callback<SaveRecordResponse> {
+            override fun onResponse(
+                call: Call<SaveRecordResponse>,
+                response: Response<SaveRecordResponse>
+            ) {
+                if (response.isSuccessful) {
+                    onResponse(true)
+                }
+            }
+
+            override fun onFailure(call: Call<SaveRecordResponse>, t: Throwable) {
+                Log.d("kkang", "save checklist failed")
+            }
+
+        })
+    }
+
+    fun deleteChecklist(checklistId: Int, accessToken: String, onResponse: (Boolean) -> Unit) {
+        val call = apiService.deleteChecklist(checklistId, "Bearer $accessToken")
+        call.enqueue(object: Callback<RecordDeleteResponse> {
+            override fun onResponse(
+                call: Call<RecordDeleteResponse>,
+                response: Response<RecordDeleteResponse>
+            ) {
+                if (response.isSuccessful) onResponse(true)
+            }
+
+            override fun onFailure(call: Call<RecordDeleteResponse>, t: Throwable) {
+                Log.d("kkang", "delete checklist failed")
+            }
+
+        })
+    }
+
+    fun toggleChecklist(checklistId: Int, accessToken: String, onResponse: (Boolean) -> Unit) {
+        val call = apiService.toggleChecklist(checklistId, "Bearer $accessToken")
+        call.enqueue(object: Callback<ApiSuccessResultBoolean> {
+            override fun onResponse(
+                call: Call<ApiSuccessResultBoolean>,
+                response: Response<ApiSuccessResultBoolean>
+            ) {
+                if (response.isSuccessful) onResponse(true)
+            }
+
+            override fun onFailure(call: Call<ApiSuccessResultBoolean>, t: Throwable) {
+                Log.d("kkang", "toggle checklist failed")
+            }
+
+        })
+    }
+
+    fun updateChecklist(
+        checklistId: Int,
+        accessToken: String,
+        title: String,
+        days: List<String>,
+        checkTime: String,
+        onResponse: (Boolean) -> Unit) {
+        val requestBody = ChecklistSaveRequest(title, days, checkTime)
+        val call = apiService.updateChecklist(checklistId, "Bearer $accessToken", requestBody)
+        call.enqueue(object: Callback<SaveRecordResponse> {
+            override fun onResponse(
+                call: Call<SaveRecordResponse>,
+                response: Response<SaveRecordResponse>
+            ) {
+                if (response.isSuccessful) {
+                    onResponse(true)
+                }
+            }
+
+            override fun onFailure(call: Call<SaveRecordResponse>, t: Throwable) {
+                Log.d("kkang", "update checklist failed")
+            }
+
+        })
+    }
 }
 
 // API 응답을 모델링할 클래스 정의
@@ -235,4 +380,31 @@ data class RecordGetResponse(
 
 data class RecordDeleteResponse(
     val status: Int
+)
+
+// 체크리스트 조회하기
+data class ApiSuccessResultListChecklistReadResponse(
+    val status: Int,
+    val response: List<ChecklistReadResponse>
+)
+
+data class ChecklistReadResponse(
+    val checklistId: Int,
+    val title: String,
+    val days: List<String>,
+    val checkTime: String,
+    val isCheck: Boolean
+)
+
+// 체크리스트 저장하기
+data class ChecklistSaveRequest(
+    val title: String,
+    val days: List<String>,
+    val checkTime: String
+)
+
+// 체크리스트 체크 토글
+data class ApiSuccessResultBoolean(
+    val status: Int,
+    val response: Boolean
 )

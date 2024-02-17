@@ -286,7 +286,6 @@ class RecordFragment : Fragment() {
                 if (response == true) {
                     getDataListAndSetAdapter()
                 } else {
-                    Log.e(TAG, "Failed to save record.")
                     makeToast(requireContext(), "Failed to delete record")
                 }
             })
