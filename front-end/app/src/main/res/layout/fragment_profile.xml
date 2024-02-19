@@ -127,26 +127,7 @@
             android:text="Logout"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/withdraw"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="38dp"
-        android:paddingVertical="20dp"
-        android:gravity="center|left"
-        android:background="@color/white">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon_withdraw"
-            android:layout_marginRight="15dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:text="Withdraw Membership"/>
-    </LinearLayout>
+
 
     <TextView
         android:layout_width="match_parent"

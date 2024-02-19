@@ -126,6 +126,12 @@ interface ApiService {
     fun getMyCommunity(
         @Header("Authorization") authToken: String
     ): Call<ApiSuccessResultListCommunityReadResponse>
+
+    @DELETE("/api/v1/community/{communityId}")
+    fun deleteCommunity(
+        @Path("communityId") communityId: Int,
+        @Header("Authorization") authToken: String
+    ): Call<RecordDeleteResponse>
 }
 
 class ApiManager(private val apiService: ApiService) {
@@ -531,6 +537,37 @@ class ApiManager(private val apiService: ApiService) {
                 Log.d("kkang", "get my post failed")
             }
 
+        })
+    }
+
+    fun deleteCommunity(accessToken: String, communityId: Int, onResponse: (Boolean) -> Unit) {
+        val callDeleteCommunity = apiService.deleteCommunity(communityId, "Bearer $accessToken")
+        callDeleteCommunity.enqueue(object: Callback<RecordDeleteResponse> {
+            override fun onResponse(
+                call: Call<RecordDeleteResponse>,
+                response: Response<RecordDeleteResponse>
+            ) {
+                if (response.isSuccessful) {
+                    onResponse(true)
+                }
+            }
+
+            override fun onFailure(call: Call<RecordDeleteResponse>, t: Throwable) {
+                Log.d("kkang", "delete my post failed")
+            }
+
+        })
+    }
+
+    fun deleteAllComment(accessToken: String, communityId: Int, onResponse: (Boolean) -> Unit) {
+        getComment(accessToken, communityId, commentData = { comment ->
+            val commentIds = comment.map { it.commentId }
+            commentIds.forEach {
+                deleteComment(accessToken, it, onResponse = {
+
+                })
+                onResponse(true)
+            }
         })
     }
 }

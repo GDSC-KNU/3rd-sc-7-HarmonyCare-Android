@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -20,6 +21,7 @@ import com.example.harmonycare.databinding.FragmentCommunityBinding
 import com.example.harmonycare.retrofit.ApiManager
 import com.example.harmonycare.retrofit.ApiService
 import com.example.harmonycare.retrofit.RetrofitClient
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class CommunityFragment : Fragment() {
 
@@ -71,6 +73,14 @@ class CommunityFragment : Fragment() {
 
             fullDialog.show()
         }
+
+        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+        bottomNavigationView?.visibility = View.VISIBLE
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // 뒤로가기를 누르면 액티비티를 종료
+            requireActivity().finish()
+        }
     }
 
     private fun getDataList(onDataLoaded: (List<Post>) -> Unit) {
@@ -93,7 +103,7 @@ class CommunityFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getDataListAndSetAdapter() {
         getDataList { communityData ->
-            adapter = PostAdapter(communityData,
+            adapter = PostAdapter(communityData, false,
                 onItemClick = { post ->
                     val action = CommunityFragmentDirections.actionCommunityDetail(
                         communityId = post.communityId,
@@ -101,6 +111,9 @@ class CommunityFragment : Fragment() {
                         content = post.content
                     )
                     findNavController().navigate(action)
+                },
+                onDeleteClick = {
+
                 }
             )
             binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())

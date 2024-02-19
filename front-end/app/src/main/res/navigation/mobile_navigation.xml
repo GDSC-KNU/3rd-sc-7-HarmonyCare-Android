@@ -39,8 +39,18 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
         <action
-            android:id="@+id/action_profile_mypost"
-            app:destination="@id/navigation_profile_mypost" />
+            android:id="@+id/action_navigation_profile_to_navigation_mypost"
+            app:destination="@id/navigation_mypost" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_mypost"
+        android:name="com.example.harmonycare.ui.profile.MyPostFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_community">
+        <action
+            android:id="@+id/action_navigation_mypost_to_navigation_community_detail"
+            app:destination="@id/navigation_community_detail" />
     </fragment>
 
     <fragment
@@ -58,12 +68,4 @@
             app:argType="string" />
     </fragment>
 
-    <fragment
-        android:id="@+id/navigation_profile_mypost"
-        android:name="com.example.harmonycare.ui.profile.MyPostFragment"
-        tools:layout="@layout/fragment_my_post">
-        <action
-            android:id="@+id/action_navigation_profile_mypost_to_navigation_community_detail"
-            app:destination="@id/navigation_community_detail"/>
-    </fragment>
 </navigation>

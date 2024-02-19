@@ -10,19 +10,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.navigation.fragment.findNavController
+import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.harmonycare.data.Checklist
+import com.example.harmonycare.R
 import com.example.harmonycare.data.Comment
-import com.example.harmonycare.data.Post
 import com.example.harmonycare.data.SharedPreferencesManager
 import com.example.harmonycare.databinding.FragmentCommunityDetailBinding
 import com.example.harmonycare.retrofit.ApiManager
 import com.example.harmonycare.retrofit.ApiService
 import com.example.harmonycare.retrofit.RetrofitClient
-import com.example.harmonycare.ui.checklist.ChecklistAdapter
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class CommunityDetailFragment : Fragment() {
 
@@ -72,6 +70,14 @@ class CommunityDetailFragment : Fragment() {
                     binding.editTextComment.clearFocus()
                 }
             }
+        }
+
+        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+        bottomNavigationView?.visibility = View.GONE
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // 프래그먼트를 종료
+            requireActivity().supportFragmentManager.popBackStack()
         }
     }
 

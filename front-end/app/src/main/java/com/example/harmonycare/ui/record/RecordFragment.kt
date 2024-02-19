@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.harmonycare.R
@@ -25,6 +26,7 @@ import com.example.harmonycare.retrofit.ApiManager
 import com.example.harmonycare.retrofit.ApiService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.example.harmonycare.retrofit.RetrofitClient
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -71,6 +73,14 @@ class RecordFragment : Fragment() {
         }
         binding.fabSleep.setOnClickListener {
             saveRecord("SLEEP", dateTimeToString(LocalDateTime.now()), dateTimeToString(LocalDateTime.now()), "description")
+        }
+
+        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+        bottomNavigationView?.visibility = View.VISIBLE
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // 뒤로가기를 누르면 액티비티를 종료
+            requireActivity().finish()
         }
     }
 
@@ -307,7 +317,6 @@ class RecordFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateLastUpdateTime() {
-        if (!::adapter.isInitialized) return // adapter가 초기화되지 않았다면 함수 종료
         val dataList = adapter.getDataList()
 
         val diaperRecords = dataList.filter { it.recordTask == "DIAPER" }

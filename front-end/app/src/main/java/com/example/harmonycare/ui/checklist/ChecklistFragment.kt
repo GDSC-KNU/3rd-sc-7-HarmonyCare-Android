@@ -9,8 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.harmonycare.R
 import com.example.harmonycare.data.Checklist
 import com.example.harmonycare.data.SharedPreferencesManager
 import com.example.harmonycare.databinding.ChecklistDialogBinding
@@ -18,6 +20,7 @@ import com.example.harmonycare.databinding.FragmentChecklistBinding
 import com.example.harmonycare.retrofit.ApiManager
 import com.example.harmonycare.retrofit.ApiService
 import com.example.harmonycare.retrofit.RetrofitClient
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -80,6 +83,14 @@ class ChecklistFragment : Fragment() {
             }
 
             bottomSheetDialog.show()
+        }
+
+        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+        bottomNavigationView?.visibility = View.VISIBLE
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // 뒤로가기를 누르면 액티비티를 종료
+            requireActivity().finish()
         }
     }
 

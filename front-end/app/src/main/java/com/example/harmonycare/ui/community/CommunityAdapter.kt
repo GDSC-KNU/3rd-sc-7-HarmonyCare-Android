@@ -9,7 +9,7 @@ import com.example.harmonycare.data.Post
 import com.example.harmonycare.databinding.CommentItemBinding
 import com.example.harmonycare.databinding.CommunityItemBinding
 
-class PostAdapter(private val dataList: List<Post>, private val onItemClick: (Post) -> Unit) : RecyclerView.Adapter<PostAdapter.PostViewHolder>()  {
+class PostAdapter(private val dataList: List<Post>, private val isMyPost: Boolean, private val onItemClick: (Post) -> Unit, private val onDeleteClick: (Post) -> Unit) : RecyclerView.Adapter<PostAdapter.PostViewHolder>()  {
     inner class PostViewHolder(private val binding: CommunityItemBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
             itemView.setOnClickListener {
@@ -23,6 +23,18 @@ class PostAdapter(private val dataList: List<Post>, private val onItemClick: (Po
         fun bind(post: Post) {
             binding.textTitle.text = post.title
             binding.textCaption.text = post.content
+            if (isMyPost) {
+                binding.buttonDelete.visibility = View.VISIBLE
+                binding.buttonDelete.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val post = dataList[position]
+                        onDeleteClick(post)
+                    }
+                }
+            } else {
+                binding.buttonDelete.visibility = View.GONE
+            }
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostAdapter.PostViewHolder {
