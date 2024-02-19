@@ -5,25 +5,6 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_pattern">
 
-
-    <!--<fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.harmonycare.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
-
-    <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.harmonycare.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
-
-    <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.harmonycare.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />-->
-
     <fragment
         android:id="@+id/navigation_checklist"
         android:name="com.example.harmonycare.ui.checklist.ChecklistFragment"
@@ -46,13 +27,43 @@
         android:id="@+id/navigation_community"
         android:name="com.example.harmonycare.ui.community.CommunityFragment"
         android:label="Community"
-        tools:layout="@layout/fragment_community"/>
+        tools:layout="@layout/fragment_community">
+        <action
+            android:id="@+id/action_community_detail"
+            app:destination="@id/navigation_community_detail" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.harmonycare.ui.profile.ProfileFragment"
         android:label="Profile"
-        tools:layout="@layout/fragment_profile"/>
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_mypost"
+            app:destination="@id/navigation_profile_mypost" />
+    </fragment>
 
+    <fragment
+        android:id="@+id/navigation_community_detail"
+        android:name="com.example.harmonycare.ui.community.CommunityDetailFragment"
+        tools:layout="@layout/fragment_community_detail">
+        <argument
+            android:name="communityId"
+            app:argType="integer" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="content"
+            app:argType="string" />
+    </fragment>
 
+    <fragment
+        android:id="@+id/navigation_profile_mypost"
+        android:name="com.example.harmonycare.ui.profile.MyPostFragment"
+        tools:layout="@layout/fragment_my_post">
+        <action
+            android:id="@+id/action_navigation_profile_mypost_to_navigation_community_detail"
+            app:destination="@id/navigation_community_detail"/>
+    </fragment>
 </navigation>

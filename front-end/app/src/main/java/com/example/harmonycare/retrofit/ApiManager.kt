@@ -4,6 +4,8 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.harmonycare.data.Checklist
+import com.example.harmonycare.data.Comment
+import com.example.harmonycare.data.Post
 import com.google.gson.annotations.SerializedName
 import okhttp3.RequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -85,6 +87,45 @@ interface ApiService {
         @Header("Authorization") authToken: String,
         @Body requestBody: ChecklistSaveRequest
     ): Call<SaveRecordResponse>
+
+    @GET("/api/v1/community")
+    fun getCommunity(
+        @Header("Authorization") authToken: String
+    ): Call<ApiSuccessResultListCommunityReadResponse>
+
+    @POST("/api/v1/community")
+    fun saveCommunity(
+        @Header("Authorization") authToken: String,
+        @Body requestBody: CommunitySaveRequest
+    ): Call<SaveRecordResponse>
+
+    @POST("/api/v1/comment")
+    fun saveComment(
+        @Header("Authorization") authToken: String,
+        @Body requestBody: CommentSaveRequest
+    ): Call<SaveRecordResponse>
+
+    @GET("/api/v1/comment/{communityId}")
+    fun getComment(
+        @Path("communityId") communityId: Int,
+        @Header("Authorization") authToken: String
+    ): Call<ApiSuccessResultListCommentReadResponse>
+
+    @DELETE("/api/v1/comment/{commentId}")
+    fun deleteComment(
+        @Path("commentId") commentId: Int,
+        @Header("Authorization") authToken: String
+    ): Call<RecordDeleteResponse>
+
+    @GET("/api/v1/member/profiles")
+    fun getProfile(
+        @Header("Authorization") authToken: String
+    ): Call<ApiSuccessResultProfileReadResponse>
+
+    @GET("/api/v1/community/me")
+    fun getMyCommunity(
+        @Header("Authorization") authToken: String
+    ): Call<ApiSuccessResultListCommunityReadResponse>
 }
 
 class ApiManager(private val apiService: ApiService) {
@@ -333,6 +374,165 @@ class ApiManager(private val apiService: ApiService) {
 
         })
     }
+
+    fun getCommunity(accessToken: String, communityData: (List<Post>) -> Unit) {
+        val call = apiService.getCommunity("Bearer $accessToken")
+        call.enqueue(object: Callback<ApiSuccessResultListCommunityReadResponse> {
+            override fun onResponse(
+                call: Call<ApiSuccessResultListCommunityReadResponse>,
+                response: Response<ApiSuccessResultListCommunityReadResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val responseData: ApiSuccessResultListCommunityReadResponse? = response.body()
+                    val postList: List<Post>? = responseData?.response
+                    if (postList != null) {
+                        communityData(postList)
+                    }
+                }
+            }
+
+            override fun onFailure(
+                call: Call<ApiSuccessResultListCommunityReadResponse>,
+                t: Throwable
+            ) {
+                Log.d("kkang", "get community failed")
+            }
+
+        })
+    }
+
+    fun saveCommunity(accessToken: String, title: String, content: String, onResponse: (Boolean) -> Unit) {
+        val requestBody = CommunitySaveRequest(title, content)
+        val call = apiService.saveCommunity("Bearer $accessToken", requestBody)
+        call.enqueue(object: Callback<SaveRecordResponse> {
+            override fun onResponse(
+                call: Call<SaveRecordResponse>,
+                response: Response<SaveRecordResponse>
+            ) {
+                if (response.isSuccessful) {
+                    onResponse(true)
+                }
+            }
+
+            override fun onFailure(call: Call<SaveRecordResponse>, t: Throwable) {
+                Log.d("kkang", "save community failed")
+            }
+
+        })
+    }
+
+    fun saveComment(accessToken: String, communityId: Int, content: String, onResponse: (Boolean) -> Unit) {
+        val requestBody = CommentSaveRequest(communityId, content)
+        val call = apiService.saveComment("Bearer $accessToken", requestBody)
+        call.enqueue(object : Callback<SaveRecordResponse> {
+            override fun onResponse(
+                call: Call<SaveRecordResponse>,
+                response: Response<SaveRecordResponse>
+            ) {
+                if (response.isSuccessful) {
+                    onResponse(true)
+                }
+            }
+
+            override fun onFailure(call: Call<SaveRecordResponse>, t: Throwable) {
+                Log.d("kkang", "save comment failed")
+            }
+        })
+    }
+
+    fun getComment(accessToken: String, communityId: Int, commentData: (List<Comment>) -> Unit) {
+        val call = apiService.getComment(communityId, "Bearer $accessToken")
+        call.enqueue(object: Callback<ApiSuccessResultListCommentReadResponse> {
+            override fun onResponse(
+                call: Call<ApiSuccessResultListCommentReadResponse>,
+                response: Response<ApiSuccessResultListCommentReadResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val responseData: ApiSuccessResultListCommentReadResponse? = response.body()
+                    val commentList: List<Comment>? = responseData?.response
+                    if (commentList != null) {
+                        commentData(commentList)
+                    }
+                }
+            }
+
+            override fun onFailure(
+                call: Call<ApiSuccessResultListCommentReadResponse>,
+                t: Throwable
+            ) {
+                Log.d("kkang", "get comment failed")
+            }
+
+        })
+    }
+
+    fun deleteComment(accessToken: String, commentId: Int, onResponse: (Boolean) -> Unit) {
+        val call = apiService.deleteComment(commentId, "Bearer $accessToken")
+        call.enqueue(object: Callback<RecordDeleteResponse> {
+            override fun onResponse(
+                call: Call<RecordDeleteResponse>,
+                response: Response<RecordDeleteResponse>
+            ) {
+                if (response.isSuccessful) {
+                    onResponse(true)
+                }
+            }
+
+            override fun onFailure(call: Call<RecordDeleteResponse>, t: Throwable) {
+                Log.d("kkang", "delete comment failed")
+            }
+
+        })
+    }
+
+    fun getProfile(accessToken: String, onResponse: (ProfileReadResponse) -> Unit) {
+        val call = apiService.getProfile("Bearer $accessToken")
+        call.enqueue(object: Callback<ApiSuccessResultProfileReadResponse> {
+            override fun onResponse(
+                call: Call<ApiSuccessResultProfileReadResponse>,
+                response: Response<ApiSuccessResultProfileReadResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val responseData: ApiSuccessResultProfileReadResponse? = response.body()
+                    val profileResponse: ProfileReadResponse? = responseData?.response
+                    if (profileResponse != null) {
+                        onResponse(profileResponse)
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<ApiSuccessResultProfileReadResponse>, t: Throwable) {
+                Log.d("kkang", "get profile failed")
+            }
+
+        })
+    }
+
+    fun getMyCommunity(accessToken: String, myCommunityData: (List<Post>) -> Unit) {
+        val call = apiService.getMyCommunity("Bearer $accessToken")
+        call.enqueue(object: Callback<ApiSuccessResultListCommunityReadResponse> {
+            override fun onResponse(
+                call: Call<ApiSuccessResultListCommunityReadResponse>,
+                response: Response<ApiSuccessResultListCommunityReadResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val responseData: ApiSuccessResultListCommunityReadResponse? = response.body()
+                    val postList: List<Post>? = responseData?.response
+                    if (postList != null) {
+                        myCommunityData(postList)
+                    }
+                }
+            }
+
+            override fun onFailure(
+                call: Call<ApiSuccessResultListCommunityReadResponse>,
+                t: Throwable
+            ) {
+                Log.d("kkang", "get my post failed")
+            }
+
+        })
+    }
 }
 
 // API 응답을 모델링할 클래스 정의
@@ -407,4 +607,41 @@ data class ChecklistSaveRequest(
 data class ApiSuccessResultBoolean(
     val status: Int,
     val response: Boolean
+)
+
+// 커뮤니티 글 조회
+data class ApiSuccessResultListCommunityReadResponse(
+    val status: Int,
+    val response: List<Post>
+)
+
+// 커뮤니티 글 작성
+data class CommunitySaveRequest(
+    val title: String,
+    val content: String
+)
+
+// 커뮤니티 댓글 작성
+data class CommentSaveRequest(
+    val communityId: Int,
+    val content: String
+)
+
+// 커뮤니티 댓글 읽기
+data class ApiSuccessResultListCommentReadResponse(
+    val status: Int,
+    val response: List<Comment>
+)
+
+// 프로필 불러오기
+data class ApiSuccessResultProfileReadResponse(
+    val status: Int,
+    val response: ProfileReadResponse
+)
+
+data class 	ProfileReadResponse(
+    val parentName: String,
+    val email: String,
+    val babyName: String,
+    val babyBirthDate: String
 )

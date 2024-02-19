@@ -1,39 +1,23 @@
 package com.example.harmonycare
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.harmonycare.data.SharedPreferencesManager
 import com.example.harmonycare.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // 저장된 accessToken을 가져와서 사용
-        val accessToken = SharedPreferencesManager.getAccessToken()
-
-        if (accessToken != null) {
-            // accessToken 존재하면 토스트 메시지로 표시
-            showToast("인증 코드: $accessToken")
-        } else {
-            // accessToken 존재하지 않으면 토스트 메시지로 표시
-            showToast("인증 코드가 없습니다.")
-        }
 
         val navView: BottomNavigationView = binding.navView
 
@@ -46,9 +30,5 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

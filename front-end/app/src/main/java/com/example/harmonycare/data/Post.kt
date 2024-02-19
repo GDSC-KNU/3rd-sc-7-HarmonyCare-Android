@@ -1,15 +1,9 @@
 package com.example.harmonycare.data
 
-import java.time.LocalDateTime
+import java.io.Serializable
 
 data class Post (
+    var communityId: Int,
     var title: String,
-    var caption: String,
-    var comments: Int,
-    var postTime: LocalDateTime,
-    var author: String,
-    var type: Int
-)
-// type
-// 1 : Parenting Question
-// 2 : Parenting Diary
+    var content: String
+) : Serializable
