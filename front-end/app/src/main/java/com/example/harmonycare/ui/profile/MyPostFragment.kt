@@ -106,8 +106,8 @@ class MyPostFragment : Fragment() {
             val apiService = RetrofitClient.retrofit.create(ApiService::class.java)
             val apiManager = ApiManager(apiService)
 
-            apiManager.deleteAllComment(accessToken, post.communityId, { response ->
-                if (response == true) {
+            apiManager.deleteAllComment(accessToken, post.communityId, { responseComment ->
+                if (responseComment == true) {
                     apiManager.deleteCommunity(accessToken, post.communityId, { response ->
                         if (response == true) {
                             getDataListAndSetAdapter()
@@ -115,8 +115,6 @@ class MyPostFragment : Fragment() {
                             makeToast(requireContext(), "Failed to delete community")
                         }
                     })
-                } else {
-                    makeToast(requireContext(), "Failed to delete all comments")
                 }
             })
 

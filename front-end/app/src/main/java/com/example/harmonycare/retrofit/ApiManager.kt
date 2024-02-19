@@ -560,16 +560,30 @@ class ApiManager(private val apiService: ApiService) {
     }
 
     fun deleteAllComment(accessToken: String, communityId: Int, onResponse: (Boolean) -> Unit) {
-        getComment(accessToken, communityId, commentData = { comment ->
-            val commentIds = comment.map { it.commentId }
-            commentIds.forEach {
-                deleteComment(accessToken, it, onResponse = {
-
-                })
+        getComment(accessToken, communityId) { comment ->
+            if (comment.isNullOrEmpty()) {
                 onResponse(true)
+                return@getComment
             }
-        })
+            val commentIds = comment.map { it.commentId }
+
+            var isSuccess = true // 모든 댓글이 성공적으로 삭제되었는지 여부를 추적하는 변수
+
+            for (commentId in commentIds) {
+                deleteComment(accessToken, commentId) { isDeleted ->
+                    if (!isDeleted) {
+                        // 댓글 삭제에 실패하면 isSuccess를 false로 설정하고 반복을 종료합니다.
+                        isSuccess = false
+                        return@deleteComment
+                    }
+                }
+            }
+
+            // 모든 댓글 삭제가 완료되면 isSuccess 값을 onResponse 콜백으로 전달합니다.
+            onResponse(isSuccess)
+        }
     }
+
 }
 
 // API 응답을 모델링할 클래스 정의

@@ -323,13 +323,18 @@ class RecordFragment : Fragment() {
         val mealRecords = dataList.filter { it.recordTask == "MEAL" }
         val sleepRecords = dataList.filter { it.recordTask == "SLEEP" }
 
-        var recentDiaperTime = findRecentTime(diaperRecords)
-        var recentMealTime = findRecentTime(mealRecords)
-        var recentSleepTime = findRecentTime(sleepRecords)
+        if (_binding != null) {
+            val binding = _binding!!
+            var recentDiaperTime = findRecentTime(diaperRecords)
+            var recentMealTime = findRecentTime(mealRecords)
+            var recentSleepTime = findRecentTime(sleepRecords)
 
-        binding.recentDiaperTextview.text = recentDiaperTime
-        binding.recentMealTextview.text = recentMealTime
-        binding.recentSleepTextview.text = recentSleepTime
+            binding.recentDiaperTextview.text = recentDiaperTime
+            binding.recentMealTextview.text = recentMealTime
+            binding.recentSleepTextview.text = recentSleepTime
+        } else {
+            Log.e(TAG, "Binding is null when trying to update last update time.")
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
