@@ -1,6 +1,5 @@
 package com.example.harmonycare.ui.community
 
-import android.R
 import android.app.Dialog
 import android.content.Context
 import android.os.Build
@@ -8,21 +7,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.harmonycare.R
 import com.example.harmonycare.data.Post
-import com.example.harmonycare.databinding.ChecklistDialogBinding
+import com.example.harmonycare.data.SharedPreferencesManager
 import com.example.harmonycare.databinding.CommunityDialogBinding
 import com.example.harmonycare.databinding.FragmentCommunityBinding
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import java.time.LocalDateTime
+import com.example.harmonycare.retrofit.ApiManager
+import com.example.harmonycare.retrofit.ApiService
+import com.example.harmonycare.retrofit.RetrofitClient
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class CommunityFragment : Fragment() {
 
     private var _binding: FragmentCommunityBinding? = null
     private val binding get() = _binding!!
+    private lateinit var adapter: PostAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentCommunityBinding.inflate(inflater, container, false)
@@ -34,14 +39,10 @@ class CommunityFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = PostAdapter(getDataList()) { checklist ->
-            showDetailDialog(checklist)
-        }
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = adapter
+        getDataListAndSetAdapter()
 
         binding.fab.setOnClickListener {
-            val fullDialog = Dialog(requireContext(), R.style.Theme_Translucent_NoTitleBar_Fullscreen)
+            val fullDialog = Dialog(requireContext(), R.style.FullScreenDialog)
             val fullDialogBinding = CommunityDialogBinding.inflate(layoutInflater)
             fullDialog.setContentView(fullDialogBinding.root)
 
@@ -49,20 +50,75 @@ class CommunityFragment : Fragment() {
                 fullDialog.dismiss()
             }
             fullDialogBinding.buttonSave.setOnClickListener {
+                val accessToken = SharedPreferencesManager.getAccessToken()
+
+                if (!accessToken.isNullOrEmpty()) {
+                    val apiService = RetrofitClient.retrofit.create(ApiService::class.java)
+                    val apiManager = ApiManager(apiService)
+
+                    val title = fullDialogBinding.editTitle.text.toString()
+                    val content = fullDialogBinding.editContent.text.toString()
+
+                    apiManager.saveCommunity(accessToken, title, content, onResponse = {
+                        if (it == true) {
+                            getDataListAndSetAdapter()
+                        }
+                        else {
+                            makeToast(requireContext(), "community save failed")
+                        }
+                    })
+                }
                 fullDialog.dismiss()
             }
 
             fullDialog.show()
         }
+
+        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+        bottomNavigationView?.visibility = View.VISIBLE
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // 뒤로가기를 누르면 액티비티를 종료
+            requireActivity().finish()
+        }
+    }
+
+    private fun getDataList(onDataLoaded: (List<Post>) -> Unit) {
+        val accessToken = SharedPreferencesManager.getAccessToken()
+
+        if (!accessToken.isNullOrEmpty()) {
+            val apiService = RetrofitClient.retrofit.create(ApiService::class.java)
+            val apiManager = ApiManager(apiService)
+
+
+            apiManager.getCommunity(accessToken,
+                { communityData ->
+                    val sortedData = communityData.sortedByDescending { it.communityId }
+                    onDataLoaded(sortedData)
+                }
+            )
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun getDataList(): List<Post> {
-        // 데이터를 가져오는 로직을 구현
-        return listOf(
-            Post("Title 1", "Caption 1", 1, LocalDateTime.now(), "Jane", 1),
-            Post("Title 2", "Caption 2", 2, LocalDateTime.now(), "Jane", 1),
-        )
+    private fun getDataListAndSetAdapter() {
+        getDataList { communityData ->
+            adapter = PostAdapter(communityData, false,
+                onItemClick = { post ->
+                    val action = CommunityFragmentDirections.actionCommunityDetail(
+                        communityId = post.communityId,
+                        title = post.title,
+                        content = post.content
+                    )
+                    findNavController().navigate(action)
+                },
+                onDeleteClick = {
+
+                }
+            )
+            binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+            binding.recyclerView.adapter = adapter
+        }
     }
 
     override fun onDestroyView() {
@@ -70,13 +126,7 @@ class CommunityFragment : Fragment() {
         _binding = null
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun showDetailDialog(post: Post) {
-        val bottomSheetDialog = BottomSheetDialog(requireContext())
-        val dialogBinding = ChecklistDialogBinding.inflate(layoutInflater)
-        bottomSheetDialog.setContentView(dialogBinding.root)
-
-
-        bottomSheetDialog.show()
+    fun makeToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT) {
+        Toast.makeText(context, message, duration).show()
     }
 }

@@ -8,7 +8,6 @@
     tools:context=".ui.profile.ProfileFragment">
 
     <LinearLayout
-        android:id="@+id/user1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingVertical="20dp"
@@ -25,6 +24,7 @@
             android:layout_marginLeft="10dp"
             android:orientation="vertical">
             <TextView
+                android:id="@+id/text_parentName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
@@ -32,6 +32,7 @@
                 android:textColor="@color/black"
                 android:text="Jane"/>
             <TextView
+                android:id="@+id/text_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -42,10 +43,6 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon_next"/>
     </LinearLayout>
     <View
         android:background="@color/dark_gray"
@@ -71,6 +68,7 @@
             android:layout_marginLeft="10dp"
             android:orientation="vertical">
             <TextView
+                android:id="@+id/text_babyName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
@@ -78,6 +76,7 @@
                 android:textColor="@color/black"
                 android:text="Olivia"/>
             <TextView
+                android:id="@+id/text_birth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -128,26 +127,7 @@
             android:text="Logout"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/withdraw"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="38dp"
-        android:paddingVertical="20dp"
-        android:gravity="center|left"
-        android:background="@color/white">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon_withdraw"
-            android:layout_marginRight="15dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:text="Withdraw Membership"/>
-    </LinearLayout>
+
 
     <TextView
         android:layout_width="match_parent"

@@ -15,7 +15,7 @@
             android:src="@drawable/icon_checkbox_gray"
             android:layout_marginLeft="30dp"
             android:layout_marginVertical="25dp"
-            android:background="@color/white"/>
+            android:background="@android:color/transparent"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -37,12 +37,12 @@
                 android:textSize="14sp"/>
         </LinearLayout>
         <ImageButton
-            android:id="@+id/button_next"
+            android:id="@+id/button_delete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="25dp"
             android:layout_weight="1"
-            android:src="@drawable/icon_next"
+            android:src="@drawable/icon_x"
             android:background="@color/white"/>
     </LinearLayout>
     <View
