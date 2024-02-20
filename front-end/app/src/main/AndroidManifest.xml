@@ -15,9 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HarmonyCare"
         tools:targetApi="31">
-        <!--<activity
-            android:name=".LoginTestActivity"
-            android:exported="false" />-->
+        <activity
+            android:name=".ui.addbaby.AddBabyActivity"
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true"

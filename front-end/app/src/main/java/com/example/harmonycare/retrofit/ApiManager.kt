@@ -32,6 +32,12 @@ interface ApiService {
     @POST("/api/v1/auth/login")
     fun loginUser(@Body requestBody: RequestBody): Call<ApiResponse>
 
+    @POST("/api/v1/baby")
+    fun addBaby(
+        @Header("Authorization") accessToken: String,
+        @Body requestBody: RequestBody
+    ): Call<Void>
+
     @POST("/api/v1/record")
     fun saveRecord(
         @Header("Authorization") authToken: String,
@@ -136,15 +142,17 @@ interface ApiService {
 
 class ApiManager(private val apiService: ApiService) {
 
-    fun loginUser(authCode: String, onResponse: (accessToken: String) -> Unit, onFailure: () -> Unit) {
-        val requestBody = "{\"authcode\": \"$authCode\"}".toRequestBody("application/json".toMediaTypeOrNull())
+    fun loginUser(authCode: String, onResponse: (accessToken: String, hasBaby: Boolean) -> Unit, onFailure: () -> Unit) {
+        val requestBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), "{\"authcode\": \"$authCode\"}")
         val call = apiService.loginUser(requestBody)
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
-                    val accessToken = response.body()?.response?.token?.accessToken
+                    val responseData = response.body()?.response
+                    val accessToken = responseData?.token?.accessToken
+                    val hasBaby = responseData?.hasBaby ?: false
                     if (accessToken != null) {
-                        onResponse(accessToken)
+                        onResponse(accessToken, hasBaby)
                         return
                     }
                 }
@@ -593,7 +601,7 @@ data class ApiResponse(
 )
 
 data class ResponseData(
-    val isFirstLogin: Boolean,
+    val hasBaby: Boolean,
     val token: TokenData
 )
 
